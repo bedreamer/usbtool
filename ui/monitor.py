@@ -23,6 +23,13 @@ def monitor_json_by_session_id(request, sid):
         'p1': session.get_P1(1),
         'p2': session.get_P2(1),
         'f1': session.get_F1(1),
+
+        't1': session.get_T1(1),
+        't2': session.get_T2(1),
+        't3': session.get_T3(1),
+
+        'modbus_tx_count': session.modbus_tx_count,
+        'modbus_rx_count': session.modbus_rx_count,
     }
 
     r = HttpResponse(json.dumps(j))
