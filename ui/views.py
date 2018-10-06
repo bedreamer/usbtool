@@ -96,7 +96,18 @@ def startup(request):
         for key, value in request.POST.items():
             print(key, '---', value)
 
-        return HttpResponseRedirect('/monitor/1/')
+        sid = api.get_convert_session(bms_can_model=request.POST['bms_can_model'],
+                                      bms_can_idx=int(request.POST['bms_can_idx']),
+                                      bms_can_channel=int(request.POST['bms_can_channel']),
+                                      bms_can_bps=request.POST['bms_can_bps'],
+                                      modbus_dev_model=int(request.POST['modbus_dev_model']),
+                                      modbus_can_model=request.POST['modbus_can_model'],
+                                      modbus_can_idx=int(request.POST['modbus_can_idx']),
+                                      modbus_can_channel=int(request.POST['modbus_can_channel']),
+                                      modbus_can_bps=request.POST['modbus_can_bps']
+                                      )
+
+        return HttpResponseRedirect('/monitor/%d/' % sid)
 
 
 def show_all_modbusdevice(request):

@@ -14,11 +14,17 @@ def monitor_by_session_id(request, sid):
 
 
 def monitor_json_by_session_id(request, sid):
+    session = api.search_session_by_id(sid)
+    if session is None:
+        print("因为使用了无效的会话ID（%d）导致重定向" % sid)
+        return HttpResponseRedirect('/')
+
     j = {
-        'p1': random.randrange(0, 100),
-        'p2': random.randrange(0, 100),
-        'f1': random.randrange(0, 100),
+        'p1': session.get_P1(1),
+        'p2': session.get_P2(1),
+        'f1': session.get_F1(1),
     }
+
     r = HttpResponse(json.dumps(j))
     r['Context-Type'] = 'application/json'
     return r
