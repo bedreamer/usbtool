@@ -34,10 +34,18 @@
     }
 
     .status-icon {
-        font-size: 20px;
+        font-size: 10px;
         font-weight: bold;
     }
 
+    .link {
+        cursor: hand;
+    }
+
+    .boxed {
+        border: #a1a1a1 1px solid;
+        border-radius: 3px;
+    }
 </style>
 
 <script>
@@ -67,6 +75,7 @@
             }
             setInterval(update_date_time, 1000);
             update_date_time();
+
         });
     {% endif %}
 </script>

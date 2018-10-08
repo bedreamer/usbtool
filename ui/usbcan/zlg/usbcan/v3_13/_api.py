@@ -2,6 +2,7 @@
 import os
 from ui.usbcan.gateway import can
 import ui.usbcan.handle as handle
+import platform
 # 导入当前接口中的全部结构体
 from ._types import _VCI_BOARD_INFO
 from ._types import _VCI_INIT_CONFIG
@@ -15,7 +16,10 @@ _zlg_dll_file_name = ''.join([os.path.dirname(__file__), '/driver/ControlCAN.dll
 # dll 句柄，由windll.LoadLibrary返回
 # 这里用cdll而不用windll的原因是函数声明方式不同
 # 解释参见: https://blog.csdn.net/jiangxuchen/article/details/8741613
-_zlg_dll = windll.LoadLibrary(_zlg_dll_file_name)
+if platform.system() == 'Linux':
+    from . import _simulator as _zlg_dll
+else:
+    _zlg_dll = windll.LoadLibrary(_zlg_dll_file_name)
 
 
 _token_name_can_device = "can device"
