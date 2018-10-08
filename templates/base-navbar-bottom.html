@@ -1,0 +1,79 @@
+<nav class="navbar-fixed-bottom navbar-default navbar-xs navbar-static-bottom">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-9">
+                <span><b>{{ bms_model }}</b></span>
+
+                <span class="divider"></span>
+                <span class="bms_offline glyphicon glyphicon-remove-circle text-danger"></span>
+                <span class="bms_offline text-danger">Offline</span>
+
+                <span class="bms_online glyphicon glyphicon-signal text-success" style="display: none"></span>
+                <span class="bms_online text-success" style="display: none">Online</span>
+                <span class="divider"></span>
+
+                <span class="glyphicon glyphicon-arrow-up"></span>
+                <span>上行:</span>
+                <span>0</span>
+                <span class="divider"></span>
+                <span class="glyphicon glyphicon-arrow-down"></span>
+                <span>下行:</span>
+                <span>0</span>
+                <span class="divider"></span>
+                <span class="divider"></span>
+                <span><b>{{ dev_model }}</b></span>
+
+                <span class="divider"></span>
+                <span class="modbus_offline glyphicon glyphicon-remove-circle text-danger"></span>
+                <span class="modbus_offline text-danger">Offline</span>
+                <span class="modbus_online glyphicon glyphicon-signal text-success" style="display: none"></span>
+                <span class="modbus_online text-success" style="display: none">Online</span>
+                <span class="divider"></span>
+
+                <span class="glyphicon glyphicon-arrow-up"></span>
+                <span>上行:</span>
+                <span id="id_modbus_tx_count">0</span>
+                <span class="divider"></span>
+                <span class="glyphicon glyphicon-arrow-down"></span>
+                <span>下行:</span>
+                <span id="id_modbus_rx_count">0</span>
+                <span class="divider"></span>
+            </div>
+            <div class="col-xs-3 text-right">
+                <span class="divider"></span>
+                <span class="glyphicon glyphicon-time text-primary"></span>
+                <span id="id_datetime">{{ now }}</span>
+            </div>
+        </div>
+    </div>
+</nav>
+<script>
+    $(document).ready(function () {
+        $.lijie.bind('modbus_rx_count', function (data) {
+            $("#id_modbus_rx_count").html(data);
+        });
+        $.lijie.bind('modbus_tx_count', function (data) {
+            $("#id_modbus_tx_count").html(data);
+        });
+
+        $.lijie.bind('bms_offline', function (data) {
+            if ( data === true ) {
+                $(".bms_offline").show();
+                $(".bms_online").hide();
+            } else {
+                $(".bms_offline").hide();
+                $(".bms_online").show();
+            }
+        });
+
+        $.lijie.bind('modbus_offline', function (data) {
+            if ( data === true ) {
+                $(".modbus_offline").show();
+                $(".modbus_online").hide();
+            } else {
+                $(".modbus_offline").hide();
+                $(".modbus_online").show();
+            }
+        });
+    });
+</script>

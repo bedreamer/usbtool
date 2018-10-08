@@ -96,7 +96,22 @@ def startup(request):
         for key, value in request.POST.items():
             print(key, '---', value)
 
-        return HttpResponseRedirect('/monitor/1/')
+        try:
+            session = api.get_convert_session(bms_can_model=request.POST['bms_can_model'],
+                                          bms_can_idx=int(request.POST['bms_can_idx']),
+                                          bms_can_channel=int(request.POST['bms_can_channel']),
+                                          bms_can_bps=request.POST['bms_can_bps'],
+                                          modbus_dev_model=int(request.POST['modbus_dev_model']),
+                                          modbus_can_model=request.POST['modbus_can_model'],
+                                          modbus_can_idx=int(request.POST['modbus_can_idx']),
+                                          modbus_can_channel=int(request.POST['modbus_can_channel']),
+                                          modbus_can_bps=request.POST['modbus_can_bps']
+                                          )
+        except Exception as e:
+            print("打开通道失败!", e)
+            return HttpResponseRedirect("/")
+
+        return HttpResponseRedirect('/monitor/%d/' % session.get_sid())
 
 
 def show_all_modbusdevice(request):
