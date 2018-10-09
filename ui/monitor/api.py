@@ -1,26 +1,18 @@
 # -*- coding: UTF-8 -*-
 __author__ = 'lijie'
+from django.http import *
 import urllib
+import time
 import json
+from . import models
 import ui.usbcan.gateway.can.api as gateway
 import ui.usbcan.gateway.modbus.api as modbus
 
 
 get_supported_can_device_list = gateway.get_supported_model_list
 get_supported_bps_list = gateway.get_device_bps_by_model
-
-
-def get_supported_idx_list(can_model):
-    if can_model is None:
-        return None
-    return [0, 1, 2, 3]
-
-
-def get_supported_channel_list(can_model):
-    if can_model is None:
-        return None
-    return [0, 1]
-
+get_supported_idx_list = gateway.get_supported_idx_list
+get_supported_channel_list = gateway.get_supported_channel_list
 
 # 会话列表
 _session_list = dict()
@@ -95,40 +87,59 @@ class ConversionSession:
         return v/100.0 if v else 0
 
 
-def get_convert_session(bms_can_model, bms_can_idx, bms_can_channel, bms_can_bps,
-                        modbus_dev_model, modbus_can_model, modbus_can_idx, modbus_can_channel, modbus_can_bps):
-    global _session_list
-    global _session_id
-
-    for _, session in _session_list.items():
-        if session.modbus_dev_model != modbus_dev_model:
-            continue
-        if session.modbus_can_model != modbus_can_model:
-            continue
-        if session.modbus_can_idx != modbus_can_idx:
-            continue
-        if session.modbus_can_channel != modbus_can_channel:
-            continue
-
-        # 当前设备的当前通道已经打开了
-        return session
-
-    # 新建一个转换会话
-    session = ConversionSession(_session_id, bms_can_model, bms_can_idx, bms_can_channel, bms_can_bps,
-                        modbus_dev_model, modbus_can_model, modbus_can_idx, modbus_can_channel, modbus_can_bps)
-
-    # 打开失败会抛出异常，在上层处理。
-    session.open()
-    _session_id += 1
-
-    _session_list[ str(session.sid) ] = session
-    return session
+def respons_json(respons, json_dict):
+    respons = HttpResponse(json.dumps(json_dict))
+    respons['Content-Type'] = 'application/json'
+    return respons
 
 
-def search_session_by_id(sid):
-    global _session_list
+def json_without_error(request, json_dict, **kwargs):
+    """
+    返回无错误应答
+    :param request:
+    :param json_dict:
+    :param args:
+    :return:
+    """
+    api_respons = {
+        'api': request.path,
+        'status': 'ok',
+        'tsp': time.strftime("%Y-%m-%d %H:%M:%S"),
+        'data': json_dict
+    }
+    for key, value in kwargs.items():
+        api_respons[key] = value
 
-    if str(sid) in _session_list:
-        return _session_list[str(sid)]
+    return respons_json(request, api_respons)
 
-    return None
+
+def json_with_error(request, reason, **kwargs):
+    """
+    返回有错误应答
+    :param request:
+    :param reason:
+    :param json_dict:
+    :param args:
+    :return:
+    """
+    api_respons = {
+        'api': request.path,
+        'status': 'error',
+        'reason': reason,
+        'tsp': time.strftime("%Y-%m-%d %H:%M:%S"),
+    }
+    for key, value in kwargs.items():
+        api_respons[key] = value
+
+    return respons_json(request, api_respons)
+
+
+def json_redir_to_page(request, reason, href, **kwargs):
+    """
+    通过API重定向
+    :param request:
+    :param reason:
+    :param kwargs:
+    :return:
+    """
+    return json_with_error(request, reason, href=href)

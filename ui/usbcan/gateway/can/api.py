@@ -15,6 +15,28 @@ def get_supported_model_list():
     return _api.get_supported_model_list()
 
 
+def get_supported_idx_list(can_model):
+    """
+    根据CAN卡型号返回支持的设备索引个数
+    :param can_model:
+    :return: int list
+    """
+    if can_model is None:
+        return None
+    return [0, 1, 2, 3]
+
+
+def get_supported_channel_list(can_model):
+    """
+    根据CAN卡型号返回支持的通道列表
+    :param can_model:
+    :return: int list
+    """
+    if can_model is None:
+        return None
+    return [0, 1]
+
+
 def get_device_driver_by_model(model_name):
     """
     获取指定设备的驱动

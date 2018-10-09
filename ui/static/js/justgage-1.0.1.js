@@ -80,8 +80,8 @@ JustGage = function(config) {
     // levelColors : string[]
     // colors of indicator, from lower to upper, in RGB format 
     levelColors : (config.levelColors) ? config.levelColors : [
-      "#a9d70b",
       "#f9c802",
+      "#a9d70b",
       "#ff0000"
     ],
 

@@ -2,6 +2,15 @@ from django.db import models
 
 
 # Create your models here.
+class BMSDevice(models.Model):
+    name = models.CharField(default='', max_length=30, help_text="设备名称")
+    model = models.CharField(default='', max_length=30, help_text="设备型号")
+
+    def __str__(self):
+        return "BMS设备"
+
+
+# Create your models here.
 class ModbusDevice(models.Model):
     name = models.CharField(default='', max_length=30, help_text="设备名称")
     model = models.CharField(default='', max_length=30, help_text="设备型号")
@@ -35,10 +44,10 @@ class Profiles(models.Model):
     bms_can_model = models.CharField(max_length=100, blank=True, help_text="BMS-CAN设备型号")
     bms_can_idx = models.IntegerField(default=0, help_text="BMS-CAN设备索引号")
     bms_can_channel = models.IntegerField(default=0, help_text="BMS-CAN设备通道")
-    bms_can_bps = models.IntegerField(default=0, help_text="BMS-CAN设备通道")
+    bms_can_bps = models.CharField(max_length=30, help_text="BMS-CAN设备波特率")
 
-    modbus_model = models.CharField(max_length=100, blank=True, help_text="BMS设备型号")
-    modbus_can_model = models.CharField(max_length=100, blank=True, help_text="BMS-CAN设备型号")
-    modbus_can_idx = models.IntegerField(default=0, help_text="BMS-CAN设备索引号")
-    modbus_can_channel = models.IntegerField(default=0, help_text="BMS-CAN设备通道")
-    modbus_can_bps = models.IntegerField(default=0, help_text="BMS-CAN设备通道")
+    modbus_model = models.CharField(max_length=100, blank=True, help_text="MODBUS设备型号")
+    modbus_can_model = models.CharField(max_length=100, blank=True, help_text="MODBUS-CAN设备型号")
+    modbus_can_idx = models.IntegerField(default=0, help_text="MODBUS-CAN设备索引号")
+    modbus_can_channel = models.IntegerField(default=0, help_text="MODBUS-CAN设备通道")
+    modbus_can_bps = models.CharField(max_length=30, help_text="MODBUS-CAN设备波特率")

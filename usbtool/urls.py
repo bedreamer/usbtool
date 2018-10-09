@@ -16,18 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 import ui.views as view
-import ui.monitor as m
+import ui.monitor
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", view.startup),
 
-    path("modbusdevice/", view.show_all_modbusdevice),
-    path("modbusdevice/new/", view.new_modbusdevice),
-    path("modbusdevice/<int:devid>/", view.show_modbusdevice_info),
-    path("modbusdevice/<int:devid>/edit/", view.edit_modbusdevice_info),
-    path("modbusdevice/<int:devid>/delete/", view.delete_modbusdevice_info),
-
-    path("monitor/<int:sid>/", m.monitor_by_session_id),
-    path("json/monitor/<int:sid>/", m.monitor_json_by_session_id),
+    path("monitor/", (ui.monitor.view.urlpatterns, "monitor", "monitor")),
 ]
