@@ -11,16 +11,55 @@ import time
 import math
 
 
-def monitor_show_main_page(request, sid):
-    context = dict()
+def monitor_show_main_page_grid(request, sid):
     s = session.get_session_by_id(sid)
     if s is None:
         return HttpResponseRedirect('/')
 
+    context = dict()
     context['bms_model'] = 'BMS'
     context['dev_model'] = s.modbus_dev
     context['sid'] = sid
-    return render(request, "监控/main.html", context=context)
+    return render(request, "监控/grid.html", context=context)
+
+
+def monitor_show_main_page_list(request, sid):
+    s = session.get_session_by_id(sid)
+    if s is None:
+        return HttpResponseRedirect('/')
+
+    context = dict()
+    context['bms_model'] = 'BMS'
+    context['dev_model'] = s.modbus_dev
+    context['sid'] = sid
+    context['registers_list'] = s.get_supported_registers_map()
+    return render(request, "监控/list.html", context=context)
+
+
+def monitor_show_main_page_panel(request, sid):
+    s = session.get_session_by_id(sid)
+    if s is None:
+        return HttpResponseRedirect('/')
+
+    context = dict()
+    context['bms_model'] = 'BMS'
+    context['dev_model'] = s.modbus_dev
+    context['sid'] = sid
+    return render(request, "监控/panel.html", context=context)
+
+
+def monitor_show_main_page(request, sid):
+    try:
+        show_type = request.GET['type']
+    except:
+        show_type = 'panel'
+
+    if show_type == 'grid':
+        return monitor_show_main_page_grid(request, sid)
+    elif show_type == 'list':
+        return monitor_show_main_page_list(request, sid)
+    else:
+        return monitor_show_main_page_panel(request, sid)
 
 
 def monitor_stop_session(request, sid):
@@ -32,7 +71,7 @@ def monitor_stop_session(request, sid):
     context['bms_model'] = 'BMS'
     context['dev_model'] = s.modbus_dev
     context['sid'] = sid
-    return render(request, "监控/main.html", context=context)
+    return render(request, "监控/panel.html", context=context)
 
 
 def monitor_fetch_session_info(request, sid):
@@ -44,7 +83,19 @@ def monitor_fetch_session_info(request, sid):
     context['bms_model'] = 'BMS'
     context['dev_model'] = s.modbus_dev
     context['sid'] = sid
-    return render(request, "监控/main.html", context=context)
+    return render(request, "监控/panel.html", context=context)
+
+
+def monitor_list_all_in_table(request, sid):
+    context = dict()
+    s = session.get_session_by_id(sid)
+    if s is None:
+        return HttpResponseRedirect('/')
+
+    context['bms_model'] = 'BMS'
+    context['dev_model'] = s.modbus_dev
+    context['sid'] = sid
+    return render(request, "监控/list.html", context=context)
 
 
 def monitor_fetch_session_json_data(request, sid):
@@ -53,10 +104,42 @@ def monitor_fetch_session_json_data(request, sid):
         reason = "因为使用了无效的会话ID（%d）导致重定向" % sid
         return api.json_redir_to_page(request, reason, href='/')
 
-    j = s.run_step_forward()
+    body, ext = s.run_step_forward(request)
 
-    return api.json_without_error(request, j)
+    return api.json_without_error(request, body, **ext)
 
+
+def monitor_fetch_session_supported_registers_json_data(request, sid):
+    s = session.get_session_by_id(sid)
+    if s is None:
+        reason = "因为使用了无效的会话ID（%d）导致重定向" % sid
+        return api.json_redir_to_page(request, reason, href='/')
+
+    body, ext = s.get_supported_registers_json(request)
+
+    return api.json_without_error(request, body, **ext)
+
+
+def monitor_session_read_register(request, sid, reg):
+    s = session.get_session_by_id(sid)
+    if s is None:
+        reason = "因为使用了无效的会话ID（%d）导致重定向" % sid
+        return api.json_redir_to_page(request, reason, href='/')
+
+    body, ext = s.read_register(request, reg)
+
+    return api.json_without_error(request, body, **ext)
+
+
+def monitor_session_write_register(request, sid, reg, str_val):
+    s = session.get_session_by_id(sid)
+    if s is None:
+        reason = "因为使用了无效的会话ID（%d）导致重定向" % sid
+        return api.json_redir_to_page(request, reason, href='/')
+
+    body, ext = s.write_register(request, reg, str_val)
+
+    return api.json_without_error(request, body, **ext)
 
 
 urlpatterns = [
@@ -65,7 +148,12 @@ urlpatterns = [
     path("<int:sid>/json/", monitor_fetch_session_json_data),
 
     path("<int:sid>/stop/", monitor_stop_session),
+    path("<int:sid>/list/", monitor_list_all_in_table),
     path("<int:sid>/info/", monitor_fetch_session_info),
+
+    path("<int:sid>/registers/", monitor_fetch_session_supported_registers_json_data),
+    path("<int:sid>/read/<str:reg>/", monitor_session_read_register),
+    path("<int:sid>/write/<str:reg>/<str:str_val>/", monitor_session_write_register),
 
     # 设备控制
     path("<int:sid>/control/start/", lambda request, sid: api.json_with_error(request, "Not Implemented", sid=sid)),
