@@ -1,6 +1,15 @@
 var p1 = null;
 var p2 = null;
 var f1 = null;
+
+function update_t(selector, data) {
+    $(selector).html([data.toString(), '℃'].join(''));
+    if ( data < 10 ) {
+        data = 10;
+    }
+    $(selector).css("width", [data.toString(), '%'].join(''));
+}
+
 $(document).ready(function () {
     p1 = new JustGage({
         id: "gauge1",
@@ -30,39 +39,17 @@ $(document).ready(function () {
         title: "出口流量(F1)"
     });
 
-    $.lijie.bind('p1', function (data) {
-        p1.refresh(data);
-    });
-    $.lijie.bind('p2', function (data) {
-        p2.refresh(data);
-    });
-    $.lijie.bind('f1', function (data) {
-        f1.refresh(data);
+    $.lijie.bind('dev', function (dev) {
+        p1.refresh(dev.data.p1);
+        p2.refresh(dev.data.p2);
+        f1.refresh(dev.data.f1);
+
+        update_t("#id_T1", dev.data.t1);
+        update_t("#id_T2", dev.data.t2);
+        update_t("#id_T3", dev.data.t3);
     });
 
-    $.lijie.bind('t1', function (data) {
-        $("#id_T1").html([data.toString(), '℃'].join(''));
-        if ( data < 10 ) {
-            data = 10;
-        }
-        $("#id_T1").css("width", [data.toString(), '%'].join(''));
-    });
-    $.lijie.bind('t2', function (data) {
-        $("#id_T2").html([data.toString(), '℃'].join(''));
-        if ( data < 10 ) {
-            data = 10;
-        }
-        $("#id_T2").css("width", [data.toString(), '%'].join(''));
-    });
-    $.lijie.bind('t3', function (data) {
-        $("#id_T3").html([data.toString(), '℃'].join(''));
-        if ( data < 10 ) {
-            data = 10;
-        }
-        $("#id_T3").css("width", [data.toString(), '%'].join(''));
-    });
-
-    $("a .glyphicon-refresh").click(function () {
+    $(".glyphicon-refresh").click(function () {
         $.lijie.query();
     });
     $.lijie.begin_query();

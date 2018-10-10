@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>监控</title>
+    <title>监控-面板视图</title>
     {% include "base-head.html" %}
 
     <script src="/static/js/raphael-2.1.4.min.js"></script>
@@ -19,6 +19,8 @@
 <body>
     {% include "base-navbar-top.html" %}
     <div class="container-fluid">
+        {% include "监控/base-视图选择.html" %}
+
         <div class="row">
             <div class="col-xs-1">
                 <hr>

@@ -149,6 +149,55 @@ class CANChannel:
         pass
 
 
-class ModbusChannel:
+class ModbusDriver:
     def __init__(self):
         pass
+
+    def read_register(self, modbus_server_address, register_address):
+        """
+        读寄存器
+        :param modbus_server_address:
+        :param register_address:
+        :return: short value
+        """
+        pass
+
+    def write_register(self, modbus_server_address, register_address, short_value):
+        """
+        写寄存器
+        :param modbus_server_address:
+        :param register_address:
+        :param short_value:
+        :return: short value
+        """
+        pass
+
+
+class RRO:
+    def __init__(self, name, address, resolution=None, signed=None, unit=None):
+        self.name = name
+        self.address = address
+        self.mode = '只读'
+        self.resolution = resolution if resolution is not None else 1
+        self.signed = signed if signed is not None else False
+        self.unit = unit if unit is not None else ''
+
+
+class RWO:
+    def __init__(self, name, address, resolution=None, signed=None, unit=None):
+        self.name = name
+        self.address = address
+        self.mode = '只写'
+        self.resolution = resolution if resolution is not None else 1
+        self.signed = signed if signed is not None else False
+        self.unit = unit if unit is not None else ''
+
+
+class RRW:
+    def __init__(self, name, address, resolution=None, signed=None, unit=None):
+        self.name = name
+        self.address = address
+        self.mode = '读写'
+        self.resolution = resolution if resolution is not None else 1
+        self.signed = signed if signed is not None else False
+        self.unit = unit if unit is not None else ''
