@@ -11,7 +11,7 @@ $(function () {
             this.value_map[key] = callback;
         },
         query: function () {
-            url = ['http://', $.lijie.host, '/json/monitor/', $.lijie.sid.toString(), '/'].join('');
+            url = ['http://', $.lijie.host, '/monitor/', $.lijie.sid.toString(), '/json/'].join('');
             $.getJSON(url, '', $.lijie.query_success).fail($.lijie.query_fail);
         },
         query_success: function (data, status, xhr) {

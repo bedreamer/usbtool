@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from django.http import *
 import ui.models as models
-import ui.api as api
+import ui.monitor.api as api
+import ui.monitor.models
+import ui.monitor.session
 # Create your views here.
 
 
@@ -97,63 +99,17 @@ def startup(request):
             print(key, '---', value)
 
         try:
-            session = api.get_convert_session(bms_can_model=request.POST['bms_can_model'],
-                                          bms_can_idx=int(request.POST['bms_can_idx']),
-                                          bms_can_channel=int(request.POST['bms_can_channel']),
-                                          bms_can_bps=request.POST['bms_can_bps'],
-                                          modbus_dev_model=int(request.POST['modbus_dev_model']),
-                                          modbus_can_model=request.POST['modbus_can_model'],
-                                          modbus_can_idx=int(request.POST['modbus_can_idx']),
-                                          modbus_can_channel=int(request.POST['modbus_can_channel']),
-                                          modbus_can_bps=request.POST['modbus_can_bps']
-                                          )
+            bms_can_profile = ui.monitor.models.CANProfile(request.POST['bms_can_model'], int(request.POST['bms_can_idx']),
+                                                       int(request.POST['bms_can_channel']), request.POST['bms_can_bps'])
+            modbus_can_profile = ui.monitor.models.CANProfile(request.POST['modbus_can_model'], int(request.POST['modbus_can_idx']),
+                                                       int(request.POST['modbus_can_channel']), request.POST['modbus_can_bps'])
+
+            bms_dev = None
+            modbus_dev = models.ModbusDevice.objects.get(id=int(request.POST['modbus_dev_model']))
+            session = ui.monitor.session.get_session_by_profiles(bms_dev, bms_can_profile, modbus_dev, modbus_can_profile)
         except Exception as e:
             print("打开通道失败!", e)
-            return HttpResponseRedirect("/")
+            return HttpResponseRedirect("/?e=%s" % str(e))
 
-        return HttpResponseRedirect('/monitor/%d/' % session.get_sid())
-
-
-def show_all_modbusdevice(request):
-    dev_list = models.ModbusDevice.objects.all()
-
-    context = dict()
-    context['dev_list'] = dev_list
-    return render(request, "设备/all.html", context=context)
-
-
-def new_modbusdevice(request):
-    if request.method == 'GET':
-        return render(request, "设备/new.html")
-    else:
-        name = request.POST['name']
-        model = request.POST['model']
-        if 0 in (len(name), len(model)):
-            return render(request, "设备/new.html")
-
-        dev = models.ModbusDevice(name=name, model=model)
-        dev.save()
-
-    return HttpResponseRedirect('/modbusdevice/')
-
-
-def show_modbusdevice_info(request, devid):
-    context = dict()
-    return render(request, "设备/all.html", context=context)
-
-
-def edit_modbusdevice_info(request, devid):
-    if request.method == 'GET':
-        context = dict()
-        context['device'] = models.ModbusDevice.objects.get(id=devid)
-        context['reg_list'] = models.ModbusRegister.objects.filter(device=devid)
-        if len(context['reg_list']) == 0:
-            context['reg_list'] = [models.ModbusRegister()]
-        return render(request, "设备/edit.html", context=context)
-    else:
-        return HttpResponseRedirect(request.path)
-
-
-def delete_modbusdevice_info(request, devid):
-    return HttpResponseRedirect('/modbusdevice/')
+        return HttpResponseRedirect('/monitor/%d/' % session.get_id())
 

@@ -7,6 +7,7 @@ $(document).ready(function () {
         value: 67,
         min: 0,
         max: 3,
+        gaugeWidthScale: 0.6,
         label: "bar",
         title: "出液压力(P1)"
     });
@@ -15,6 +16,7 @@ $(document).ready(function () {
         value: 99,
         min: 0,
         max: 3,
+        gaugeWidthScale: 0.6,
         label: "bar",
         title: "回液压力(P2)"
     });
@@ -23,6 +25,7 @@ $(document).ready(function () {
         value: 67,
         min: 0,
         max: 3,
+        gaugeWidthScale: 0.6,
         label: "L/min",
         title: "出口流量(F1)"
     });
