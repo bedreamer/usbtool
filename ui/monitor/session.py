@@ -149,6 +149,12 @@ class MonitorSession:
     def write_register(self, request, reg, str_val):
         return self.modbus_dev_driver.write_register(request, reg, str_val)
 
+    def get_modbus_dev(self):
+        return self.modbus_dev
+
+    def get_bms_dev(self):
+        return self.bms_dev
+
 
 def get_session_by_profiles(bms_dev, bms_can_profile, modbus_dev, modbus_can_profile):
     global _session_map, _session_id
