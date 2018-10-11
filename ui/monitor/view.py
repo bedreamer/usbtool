@@ -11,55 +11,18 @@ import time
 import math
 
 
-def monitor_show_main_page_grid(request, sid):
-    s = session.get_session_by_id(sid)
-    if s is None:
-        return HttpResponseRedirect('/')
-
-    context = dict()
-    context['bms_model'] = 'BMS'
-    context['dev_model'] = s.modbus_dev
-    context['sid'] = sid
-    return render(request, "监控/grid.html", context=context)
-
-
-def monitor_show_main_page_list(request, sid):
-    s = session.get_session_by_id(sid)
-    if s is None:
-        return HttpResponseRedirect('/')
-
-    context = dict()
-    context['bms_model'] = 'BMS'
-    context['dev_model'] = s.modbus_dev
-    context['sid'] = sid
-    context['registers_list'] = s.get_supported_registers_map()
-    return render(request, "监控/list.html", context=context)
-
-
-def monitor_show_main_page_panel(request, sid):
-    s = session.get_session_by_id(sid)
-    if s is None:
-        return HttpResponseRedirect('/')
-
-    context = dict()
-    context['bms_model'] = 'BMS'
-    context['dev_model'] = s.modbus_dev
-    context['sid'] = sid
-    return render(request, "监控/panel.html", context=context)
-
 
 def monitor_show_main_page(request, sid):
-    try:
-        show_type = request.GET['type']
-    except:
-        show_type = 'panel'
+    context = dict()
+    s = session.get_session_by_id(sid)
+    if s is None:
+        return HttpResponseRedirect('/')
 
-    if show_type == 'grid':
-        return monitor_show_main_page_grid(request, sid)
-    elif show_type == 'list':
-        return monitor_show_main_page_list(request, sid)
-    else:
-        return monitor_show_main_page_panel(request, sid)
+    context['sid'] = sid
+    context['modbus_dev'] = s.get_modbus_dev()
+    context['bms_dev'] = s.get_bms_dev()
+
+    return render(request, "监控/pane1l.html", context=context)
 
 
 def monitor_stop_session(request, sid):
@@ -142,6 +105,22 @@ def monitor_session_write_register(request, sid, reg, str_val):
     return api.json_without_error(request, body, **ext)
 
 
+def monitor_session_modbus_read(request, sid, server_address, reg):
+    """
+    通过回话读取指定设备的寄存器
+    :param request:
+    :param sid:
+    :param server_address:
+    :param reg:
+    :return:
+    """
+    return api.json_without_error(request, {})
+
+
+def monitor_session_modbus_write(request, sid, server_address, reg, val):
+    return api.json_without_error(request, {})
+
+
 urlpatterns = [
     path("<int:sid>/", monitor_show_main_page),
 
@@ -154,6 +133,9 @@ urlpatterns = [
     path("<int:sid>/registers/", monitor_fetch_session_supported_registers_json_data),
     path("<int:sid>/read/<str:reg>/", monitor_session_read_register),
     path("<int:sid>/write/<str:reg>/<str:str_val>/", monitor_session_write_register),
+
+    path("<int:sid>/modbus/server/<int:server_address>/x03/register/<int:reg>/", monitor_session_modbus_read),
+    path("<int:sid>/modbus/server/<int:server_address>/x06/register/<int:reg>/value/<str:val>/", monitor_session_modbus_write),
 
     # 设备控制
     path("<int:sid>/control/start/", lambda request, sid: api.json_with_error(request, "Not Implemented", sid=sid)),

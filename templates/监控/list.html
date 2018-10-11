@@ -13,6 +13,7 @@
             $.lijie.init({{ sid }});
         });
     </script>
+    <script src="/static/lj/list.js"></script>
 
 </head>
 <body>
@@ -33,17 +34,17 @@
         </div>
 
         <div class="row">
-            <div class="col-xs-offset-1 col-xs-10">
+            <div class="col-xs-offset-1 col-xs-6">
                 <table class="table table-condensed table-bordered table-hover">
-                    <caption>寄存器列表</caption>
+                    <caption><strong><span class="id_modbus_dev_model"></span></strong> 通用寄存器列表</caption>
                     <tr>
-                        <th width="60px;">#</th>
+                        <th>#</th>
                         <th>名称</th>
-                        <th width="100px;">地址</th>
-                        <th width="100px;">倍率</th>
-                        <th width="100px;">权限</th>
-                        <th width="100px;">当前值</th>
-                        <th width="100px;">单位</th>
+                        <th>地址</th>
+                        <th>倍率</th>
+                        <th>权限</th>
+                        <th>当前值</th>
+                        <th>单位</th>
                         <th>操作</th>
                     </tr>
                     {% for name, reg in registers_list.items %}
@@ -55,7 +56,30 @@
                         <td class="text-center">{{ reg.mode }}</td>
                         <td class="text-center"></td>
                         <td class="text-center">{{ reg.unit }}</td>
-                        <td class="text-right"></td>
+                        <td class="text-center">
+                            {% if reg.mode == '只写' or reg.mode == '读写' %}
+                            <span class="glyphicon glyphicon-send text-primary"></span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            <div class="col-xs-offset-1 col-xs-3">
+                <table class="table table-condensed table-bordered table-hover">
+                    <caption><strong><span class="id_modbus_dev_model"></span></strong> 状态寄存器</caption>
+                    <tr>
+                        <th>#</th>
+                        <th>名称</th>
+                        <th>值</th>
+                        <th>操作</th>
+                    </tr>
+                    {% for name, reg in registers_list.items %}
+                    <tr>
+                        <th>{{ forloop.counter }}</th>
+                        <td>{{ name }}</td>
+                        <td class="text-center">{{ reg.address }}</td>
+                        <td class="text-center">{{ reg.resolution }}</td>
                     </tr>
                     {% endfor %}
                 </table>

@@ -1,5 +1,6 @@
 # -*- coding: utf8 -*-
 from ui.monitor import models
+import random
 
 
 class ModBus读供液温度(models.ModBus读供液温度):
@@ -155,13 +156,13 @@ class Driver:
 
     def run_step_forward(self, request):
         return {
-            'p1': 0,
-            'p2': 0,
-            'f1': 0,
+            'p1': random.randrange(0, 3),
+            'p2': random.randrange(0, 3),
+            'f1': random.randrange(0, 3),
 
-            't1': 0,
-            't2': 0,
-            't3': 0,
+            't1': random.randrange(0, 100),
+            't2': random.randrange(0, 100),
+            't3': random.randrange(0, 100),
         }
 
     def get_supported_registers_map(self):

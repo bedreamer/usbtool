@@ -7,6 +7,9 @@ $(function () {
         init: function(sid) {
             this.sid = sid;
         },
+        get_sid: function() {
+            return this.sid;
+        },
         bind: function (key, callback) {
             if ( this.value_map[key] === undefined ) {
                 this.value_map[key] = new Array();
