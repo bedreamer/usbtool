@@ -16,7 +16,7 @@ _zlg_dll_file_name = ''.join([os.path.dirname(__file__), '/driver/ControlCAN.dll
 # dll 句柄，由windll.LoadLibrary返回
 # 这里用cdll而不用windll的原因是函数声明方式不同
 # 解释参见: https://blog.csdn.net/jiangxuchen/article/details/8741613
-if platform.system() == 'Linux':
+if platform.system() != 'Windows':
     from . import _simulator as _zlg_dll
 else:
     _zlg_dll = windll.LoadLibrary(_zlg_dll_file_name)
