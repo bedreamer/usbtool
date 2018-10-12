@@ -19,7 +19,7 @@ class Driver(driver.ModbusDeviceDriver):
         self.modbus_channel = models.ModbusCANChannel(modbus_can_profile)
         self.session = session
         self.dev = modbus_dev
-        super(self.__class__, self).__init__("恒温恒流设备", __model__, self.modbus_channel, session, device)
+        super(self.__class__, self).__init__("恒温恒流设备", __model__, self.modbus_channel, session, modbus_dev)
 
         word_bits_map = [
                     ("", ""),
@@ -48,9 +48,9 @@ class Driver(driver.ModbusDeviceDriver):
         self.create_yaoce_register(ui_name="s2", name='加热输出', address=4)
         self.create_yaoce_register(ui_name="s3", name='循环输出', address=5)
 
-        self.create_yaoce_register(ui_name="p1", name='供液口压力', address=6, resolution=10, unit='bar')
-        self.create_yaoce_register(ui_name="p2", name='回液口压力', address=7, resolution=10, unit='bar')
-        self.create_yaoce_register(ui_name="f1", name='供液口流量', address=8, resolution=100, unit='L/min')
+        self.create_yaoce_register(ui_name="p1", name='供液口压力', address=6, resolution=100, unit='bar')
+        self.create_yaoce_register(ui_name="p2", name='回液口压力', address=7, resolution=100, unit='bar')
+        self.create_yaoce_register(ui_name="f1", name='供液口流量', address=8, resolution=10, unit='L/min')
 
         self.create_yaokong_register(ui_name="k1", name='运行', address=9)
         self.create_yaokong_register(ui_name="k2", name='停止', address=10)

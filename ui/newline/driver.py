@@ -1,10 +1,26 @@
 # -*- coding: utf8 -*-
 import random
+import struct
 
 
 class YaoceRegister:
     def __init__(self, ui_name, name, address, resolution, unit):
         self.ui_name, self.name, self.address, self.resolution, self.unit = ui_name, name, address, resolution, unit
+
+    def complie_modbus_value(self, display_value):
+        pass
+
+    def complie_display_value(self, modbus_value):
+        if modbus_value & 0x8000 == 0x8000:
+            x = struct.pack(">h", modbus_value)
+            modbus_value = struct.unpack(">h", x)[0]
+
+        if self.resolution == 10:
+            return round(modbus_value/10.0, 1)
+        elif self.resolution == 100:
+            return round(modbus_value/100.0, 2)
+        else:
+            return modbus_value
 
 
 class YaoxinRegister:
@@ -80,5 +96,5 @@ class ModbusDeviceDriver(object):
         body = dict()
         for reg in self.yaoce_register_list:
             modbus_value = self.modbuscan_channel.read_register(modbus_server_address, reg.address)
-            body[reg.ui_name] = modbus_value
+            body[reg.ui_name] = reg.complie_display_value(modbus_value)
         return body

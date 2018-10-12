@@ -65,10 +65,10 @@ class ModbusCANChannel(object):
         }
 
     def read_register(self, server_address, register_address):
-        return modbus.read_register(self, server_address, register_address)
+        return modbus.read_register(self.can_channel_handle, server_address, register_address)
 
     def write_register(self, server_address, register_address, short_value):
-        return modbus.write_register(self, server_address, register_address, short_value)
+        return modbus.write_register(self.can_channel_handle, server_address, register_address, short_value)
 
 
 class ModbusDriver:
