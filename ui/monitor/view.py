@@ -11,7 +11,6 @@ import time
 import math
 
 
-
 def monitor_show_main_page(request, sid):
     context = dict()
     s = session.get_session_by_id(sid)
@@ -21,8 +20,74 @@ def monitor_show_main_page(request, sid):
     context['sid'] = sid
     context['modbus_dev'] = s.get_modbus_dev()
     context['bms_dev'] = s.get_bms_dev()
+    context['session'] = s
+    s.set_mode('panel')
 
-    return render(request, "监控/pane1l.html", context=context)
+    modbus_dev_driver = s.get_modbus_dev_driver()
+    bms_dev_driver = s.get_bms_dev_driver()
+
+    # 根据型号不同加载不同的UI模板
+    modbus_dev_sections_name_list = [
+        'model_恒温恒流设备_状态表区',
+        'model_恒温恒流设备_温度计区',
+        'model_恒温恒流设备_仪表盘区',
+        'model_恒温恒流设备_控制区',
+        'model_恒温恒流设备_故障显示区'
+    ]
+    for section_name in modbus_dev_sections_name_list:
+        context[section_name] = modbus_dev_driver.get_template(section_name)
+
+    bms_dev_sections_name_list = ['model_BMS设备_状态表区', 'model_BMS设备_仪表盘区']
+    #for section_name in bms_dev_sections_name_list:
+    context['model_BMS设备_状态表区'] = "监控/model-BMS设备状态表.html"
+    context['model_BMS设备_仪表盘区'] = "监控/model-BMS设备仪表盘区.html"
+
+    return render(request, "监控/base-会话显示面板.html", context=context)
+
+
+def monitor_list_all_in_table(request, sid):
+    context = dict()
+    s = session.get_session_by_id(sid)
+    if s is None:
+        return HttpResponseRedirect('/')
+
+    context['bms_model'] = 'BMS'
+    context['dev_model'] = s.modbus_dev
+    context['sid'] = sid
+    context['session'] = s
+    s.set_mode('list')
+
+    return render(request, "监控/list.html", context=context)
+
+
+def monitor_session_in_grid(request, sid):
+    context = dict()
+    s = session.get_session_by_id(sid)
+    if s is None:
+        return HttpResponseRedirect('/')
+
+    context['bms_model'] = 'BMS'
+    context['dev_model'] = s.modbus_dev
+    context['sid'] = sid
+    context['session'] = s
+    s.set_mode('grid')
+
+    return render(request, "监控/base-曲线视图模板.html", context=context)
+
+
+def monitor_show_session_configure_page(request, sid):
+    context = dict()
+    s = session.get_session_by_id(sid)
+    if s is None:
+        return HttpResponseRedirect('/')
+
+    context['sid'] = sid
+    context['modbus_dev'] = s.get_modbus_dev()
+    context['bms_dev'] = s.get_bms_dev()
+    context['session'] = s
+    s.set_mode('options')
+
+    return render(request, "监控/base-会话配置面板.html", context=context)
 
 
 def monitor_stop_session(request, sid):
@@ -34,6 +99,8 @@ def monitor_stop_session(request, sid):
     context['bms_model'] = 'BMS'
     context['dev_model'] = s.modbus_dev
     context['sid'] = sid
+    context['session'] = s
+
     return render(request, "监控/panel.html", context=context)
 
 
@@ -46,10 +113,12 @@ def monitor_fetch_session_info(request, sid):
     context['bms_model'] = 'BMS'
     context['dev_model'] = s.modbus_dev
     context['sid'] = sid
+    context['session'] = s
+
     return render(request, "监控/panel.html", context=context)
 
 
-def monitor_list_all_in_table(request, sid):
+def monitor_session_in_list(request, sid):
     context = dict()
     s = session.get_session_by_id(sid)
     if s is None:
@@ -58,6 +127,8 @@ def monitor_list_all_in_table(request, sid):
     context['bms_model'] = 'BMS'
     context['dev_model'] = s.modbus_dev
     context['sid'] = sid
+    context['session'] = s
+
     return render(request, "监控/list.html", context=context)
 
 
@@ -122,13 +193,17 @@ def monitor_session_modbus_write(request, sid, server_address, reg, val):
 
 
 urlpatterns = [
-    path("<int:sid>/", monitor_show_main_page),
+    path("<int:sid>/", lambda request, sid: HttpResponseRedirect(request.path + 'panel/')),
 
     path("<int:sid>/json/", monitor_fetch_session_json_data),
 
+    path("<int:sid>/panel/", monitor_show_main_page),
+    path("<int:sid>/grid/", monitor_session_in_grid),
+    path("<int:sid>/list/", monitor_session_in_list),
+
+    path("<int:sid>/options/", monitor_show_session_configure_page),
+
     path("<int:sid>/stop/", monitor_stop_session),
-    path("<int:sid>/list/", monitor_list_all_in_table),
-    path("<int:sid>/info/", monitor_fetch_session_info),
 
     path("<int:sid>/registers/", monitor_fetch_session_supported_registers_json_data),
     path("<int:sid>/read/<str:reg>/", monitor_session_read_register),

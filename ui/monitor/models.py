@@ -1,119 +1,6 @@
 # -*- coding: utf8 -*-
-
-
-class ModbusFunctionBasic(object):
-    def __init__(self):
-        self.function_name = self.__class__.__name__.strip('ModBus')
-
-
-class ModBus读供液温度(ModbusFunctionBasic):
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ModBus读回液温度(ModbusFunctionBasic):
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ModBus读制冷输出状态(ModbusFunctionBasic):
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ModBus读加热输出状态(ModbusFunctionBasic):
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ModBus读循环输出状态(ModbusFunctionBasic):
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ModBus读供液口压力(ModbusFunctionBasic):
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ModBus读回液口压力(ModbusFunctionBasic):
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ModBus读供液口流量(ModbusFunctionBasic):
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ModBus读比例阀开度(ModbusFunctionBasic):
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ModBus读实际设定温度值(ModbusFunctionBasic):
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ModBus读实际设定流量值(ModbusFunctionBasic):
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ModBus读取通讯状态(ModbusFunctionBasic):
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ModBus读取状态位(ModbusFunctionBasic):
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ModBus控制设备启动(ModbusFunctionBasic):
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ModBus控制设备关闭(ModbusFunctionBasic):
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ModBus控制排空加液开(ModbusFunctionBasic):
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ModBus控制排空加液关(ModbusFunctionBasic):
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ModBus控制内循环开(ModbusFunctionBasic):
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ModBus控制内循环关(ModbusFunctionBasic):
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ModBus设置温度(ModbusFunctionBasic):
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ModBus设置流量(ModbusFunctionBasic):
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ModBus设置运行程序号(ModbusFunctionBasic):
-    def __init__(self):
-        super(self.__class__, self).__init__()
+import ui.usbcan.gateway.can.api as gateway
+import ui.usbcan.gateway.modbus.api as modbus
 
 
 class CANProfile:
@@ -141,12 +28,47 @@ class CANProfile:
         return True
 
 
-class CANChannel:
-    """
-    CAN通信通道
-    """
-    def __init__(self):
-        pass
+class ModbusCANChannel(object):
+    def __init__(self, can_profile):
+        self.can_profile = can_profile
+        can_model, can_idx = self.can_profile.can_model, self.can_profile.can_idx
+        dev_handle = gateway.open_device_by_model(can_model, can_idx)
+        if dev_handle in {-1, 0, None}:
+            raise ValueError('打开设备失败')
+
+        can_channel, can_bps = self.can_profile.can_channel_idx, self.can_profile.bps
+        channel_handle = gateway.open_channel(dev_handle, can_channel, can_bps)
+        if channel_handle in {-1, 0, None}:
+            raise ValueError('打开通道失败')
+
+        self.can_dev_handle = dev_handle
+        self.can_channel_handle = channel_handle
+
+        self.can_frame_tx = 0
+        self.can_frame_rx = 0
+        self.offline = True
+
+    def get_can_channel_status_bar_json(self, dev_id, dev_model, dev_name):
+        return {
+            'can_model': self.can_profile.can_model,
+            'can_idx': self.can_profile.can_channel_idx,
+            'can_ch_idx': self.can_profile.can_channel_idx,
+            'can_bps': self.can_profile.bps,
+            'can_dev_handle': self.can_dev_handle,
+            'can_ch_handle': self.can_channel_handle,
+            'offline': self.offline,
+            'tx_count': self.can_frame_tx,
+            'rx_count': self.can_frame_rx,
+            'dev_model': dev_model,
+            'dev_id': dev_id,
+            'dev_name': dev_name
+        }
+
+    def read_register(self, server_address, register_address):
+        return modbus.read_register(self, server_address, register_address)
+
+    def write_register(self, server_address, register_address, short_value):
+        return modbus.write_register(self, server_address, register_address, short_value)
 
 
 class ModbusDriver:
@@ -171,33 +93,3 @@ class ModbusDriver:
         :return: short value
         """
         pass
-
-
-class RRO:
-    def __init__(self, name, address, resolution=None, signed=None, unit=None):
-        self.name = name
-        self.address = address
-        self.mode = '只读'
-        self.resolution = resolution if resolution is not None else 1
-        self.signed = signed if signed is not None else False
-        self.unit = unit if unit is not None else ''
-
-
-class RWO:
-    def __init__(self, name, address, resolution=None, signed=None, unit=None):
-        self.name = name
-        self.address = address
-        self.mode = '只写'
-        self.resolution = resolution if resolution is not None else 1
-        self.signed = signed if signed is not None else False
-        self.unit = unit if unit is not None else ''
-
-
-class RRW:
-    def __init__(self, name, address, resolution=None, signed=None, unit=None):
-        self.name = name
-        self.address = address
-        self.mode = '读写'
-        self.resolution = resolution if resolution is not None else 1
-        self.signed = signed if signed is not None else False
-        self.unit = unit if unit is not None else ''

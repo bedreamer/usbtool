@@ -1,92 +1,23 @@
 # -*- coding: utf8 -*-
 import time
 import importlib
-import ui.usbcan.gateway.can.api as gateway
-import ui.usbcan.gateway.modbus.api as modbus
 
 
 _session_map = dict()
 _session_id = 1
 
 
-class CANChannel(object):
-    def __init__(self, can_profile):
-        self.can_profile = can_profile
-        can_model, can_idx = self.can_profile.can_model, self.can_profile.can_idx
-        dev_handle = gateway.open_device_by_model(can_model, can_idx)
-        if dev_handle in {-1, 0, None}:
-            raise ValueError('打开设备失败')
-
-        can_channel, can_bps = self.can_profile.can_channel_idx, self.can_profile.bps
-        channel_handle = gateway.open_channel(dev_handle, can_channel, can_bps)
-        if channel_handle in {-1, 0, None}:
-            raise ValueError('打开通道失败')
-
-        self.can_dev_handle = dev_handle
-        self.can_channel_handle = channel_handle
-
-        self.can_frame_tx = 0
-        self.can_frame_rx = 0
-        self.offline = True
-
-    def get_can_channel_status_bar_json(self, dev_id, dev_model, dev_name):
-        return {
-            'can_model': self.can_profile.can_model,
-            'can_idx': self.can_profile.can_channel_idx,
-            'can_ch_idx': self.can_profile.can_channel_idx,
-            'can_bps': self.can_profile.bps,
-            'can_dev_handle': self.can_dev_handle,
-            'can_ch_handle': self.can_channel_handle,
-            'offline': self.offline,
-            'tx_count': self.can_frame_tx,
-            'rx_count': self.can_frame_rx,
-            'dev_model': dev_model,
-            'dev_id': dev_id,
-            'dev_name': dev_name
-        }
-
-
-class ModbusDevDriverWrapper(CANChannel):
-    def __init__(self, modbus_dev, modbus_can_profile):
-        super(self.__class__, self).__init__(modbus_can_profile)
-        self.modbus_dev = modbus_dev
-        self.modbus_can_profile = modbus_can_profile
-        model = importlib.import_module("ui.newline." + modbus_dev.model)
-        self.modbus_dev_driver = model.Driver(self)
-
-        self.offline = False
-
-    def run_step_forward(self, request):
-        data_pack = self.modbus_dev_driver.run_step_forward(request)
-        id, model, name = self.modbus_dev.id, self.modbus_dev.model, self.modbus_dev.name
-        starts_bar_json = self.get_can_channel_status_bar_json(id, model, name)
-        json_body = {"status": starts_bar_json, "data": data_pack}
-        return json_body, {}
-
-    def get_supported_registers_map(self):
-        return self.modbus_dev_driver.get_supported_registers_map()
-
-    def get_supported_registers_json(self, request):
-        return self.modbus_dev_driver.get_supported_registers_json(request)
-
-    def read_register(self, request, reg):
-        return self.modbus_dev_driver.read_register(request, reg)
-
-    def write_register(self, request, reg, str_val):
-        return self.modbus_dev_driver.write_register(request, reg, str_val)
-
-
-class BMSDriverWrapper(CANChannel):
+class BMSDriverWrapper:
     def __init__(self, bms_dev, bms_can_profile):
-        super(self.__class__, self).__init__(bms_can_profile)
         self.bms_dev = bms_dev
         self.bms_can_profile = bms_can_profile
+        self.bms_dev_driver = None
 
     def run_step_forward(self, request):
         data_pack = {}
 
         id, model, name = 0, '', ''
-        starts_bar_json = self.get_can_channel_status_bar_json(id, model, name)
+        starts_bar_json = {}
         json_body = {"status": starts_bar_json, "data": data_pack}
         return json_body, {}
 
@@ -98,7 +29,8 @@ class MonitorSession:
         self.modbus_dev = modbus_dev
         self.modbus_can_profile = modbus_can_profile
 
-        self.modbus_dev_driver = ModbusDevDriverWrapper(modbus_dev, modbus_can_profile)
+        newline_device = importlib.import_module("ui.newline." + modbus_dev.model)
+        self.modbus_dev_driver = newline_device.Driver(self, modbus_dev, modbus_can_profile)
 
         self.bms_dev = bms_dev
         self.bms_can_profile = bms_can_profile
@@ -107,6 +39,11 @@ class MonitorSession:
         self.call_counter = 0
         self.birth = time.strftime("%Y-%m-%d %H:%M:%S")
         self.birth_tsp = time.time()
+
+        self.mode = 'panel'
+
+    def set_mode(self, mode):
+        self.mode = mode
 
     def run_step_forward(self, request):
         self.call_counter += 1
@@ -136,6 +73,12 @@ class MonitorSession:
 
     def stop(self):
         pass
+
+    def get_modbus_dev_driver(self):
+        return self.modbus_dev_driver
+
+    def get_bms_dev_driver(self):
+        return self.bms_dev_driver.bms_dev_driver
 
     def get_supported_registers_map(self):
         return self.modbus_dev_driver.get_supported_registers_map()

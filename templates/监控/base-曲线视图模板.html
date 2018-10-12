@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>监控-面板视图</title>
+    {% include "base-head.html" %}
+
+    <script src="/static/js/raphael-2.1.4.min.js"></script>
+    <script src="/static/js/justgage-1.0.1.js"></script>
+    <script src="/static/lj/gateway.js"></script>
+    <script src="/static/js/Chart.bundle.js" ></script>
+
+    <script>
+        $(document).ready(function () {
+            $.lijie.init({{ sid }});
+        });
+    </script>
+    <script src="/static/lj/panel.js"></script>
+    <script>
+        $(document).ready(function () {
+            function draw_line(c, name, leg, lable, data, color) {
+                var ctx = document.getElementById(c).getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: lable,
+                        datasets: [{
+                            label: leg,
+                            data: data,
+                            borderColor: color,
+                            borderWidth: 1,
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true
+                                }
+                            }]
+                        },
+                        tooltips: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        title: {
+                            display: true,
+                            text: name
+                        },/*
+                        elements: {
+                            line: {
+                                tension: 0, // disables bezier curves
+                            }
+                        },*/
+                        animation: {
+                            duration: 0, // general animation time
+                        },
+                        hover: {
+                            animationDuration: 0, // duration of animations when hovering an item
+                        },
+                        // grid line settings
+                        gridLines: {
+                            drawOnChartArea: false, // only want the grid lines for one axis to show up
+                        },
+                        responsiveAnimationDuration: 0, // animation duration after a resize
+                    }
+                });
+            }
+            draw_line('id_grid_canvas', 'dd', 'dd', [1,2,3,4], [1,1,2,1], 'rgba(255,99,132,1)');
+        });
+    </script>
+
+
+</head>
+<body>
+    {% include "base-navbar-top.html" %}
+    <div class="container-fluid">
+        {% include "监控/base-视图选择.html" %}
+
+        <div class="row">
+            <div class="col-xs-offset-1 col-xs-4">
+                <hr>
+            </div>
+            <div class="col-xs-2 text-center boxed">
+                <h6>{{ modbus_dev.model }} 曲线显示区</h6>
+            </div>
+            <div class="col-xs-4">
+                <hr>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-offset-1 col-xs-10">
+                <canvas id="id_grid_canvas" style="width: 100%; height: 500px;"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    {% include "base-navbar-bottom.html" %}
+    {% include "base-tail.html" %}
+</body>
+</html>
