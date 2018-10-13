@@ -72,6 +72,21 @@ def monitor_session_in_grid(request, sid):
     context['session'] = s
     s.set_mode('grid')
 
+    all = models.YaoceData.objects.filter(server_address=1).order_by('-tsp')[:10]
+
+    axis_x = list()
+    t1 = list()
+    t2 = list()
+    for r in all:
+        axis_x.append(r.tsp.strftime("%H:%M:%S"))
+        j = json.loads(r.txt)
+        t1.append(j['t1'])
+        t2.append(j['t2'])
+
+    context['t1'] = t1
+    context['t2'] = t2
+    context['axis_x'] = axis_x
+
     return render(request, "监控/base-曲线视图模板.html", context=context)
 
 

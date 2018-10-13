@@ -9,8 +9,16 @@
     <script src="/static/js/justgage-1.0.1.js"></script>
     <script src="/static/lj/gateway.js"></script>
     <script src="/static/js/Chart.bundle.js" ></script>
-
     <script>
+        window.chartColors = {
+                red: "rgb(255, 99, 132)",
+                orange: "rgb(255, 159, 64)",
+                yellow: "rgb(255, 205, 86)",
+                green: "rgb(75, 192, 192)",
+                blue:"rgb(54, 162, 235)",
+                grey: "rgb(201, 203, 207)",
+                purple: "rgb(153, 102, 255)",
+            };
         $(document).ready(function () {
             $.lijie.init({{ sid }});
         });
@@ -18,27 +26,43 @@
     <script src="/static/lj/panel.js"></script>
     <script>
         $(document).ready(function () {
-            function draw_line(c, name, leg, lable, data, color) {
+            function draw_line(c, name, leg, lable, datasets, color) {
                 var ctx = document.getElementById(c).getContext('2d');
                 var myChart = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: lable,
-                        datasets: [{
-                            label: leg,
-                            data: data,
-                            borderColor: color,
-                            borderWidth: 1,
-                            fill: false
-                        }]
+                        datasets: datasets
                     },
                     options: {
                         responsive: true,
                         scales: {
-                            yAxes: [{
-                                ticks: {
-                                    beginAtZero: true
+                            xAxes: [{
+                                display: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: '时间轴'
                                 }
+                            }],
+                            yAxes: [{
+                                display: true,
+                                position: 'left',
+                                id: 'y-axis-t1',
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Value'
+                                }
+                            },{
+                                display: true,
+                                position: 'right',
+                                id: 'y-axis-t2',
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Valu1e'
+                                },
+                                gridLines: {
+                                    drawOnChartArea: false, // only want the grid lines for one axis to show up
+                                },
                             }]
                         },
                         tooltips: {
@@ -68,7 +92,27 @@
                     }
                 });
             }
-            draw_line('id_grid_canvas', 'dd', 'dd', [1,2,3,4], [1,1,2,1], 'rgba(255,99,132,1)');
+            var line_t1 = {
+                label: "t1",
+                data: {{ t1 }},
+                backgroundColor: window.chartColors.red,
+                borderColor: window.chartColors.red,
+                borderWidth: 1,
+                fill: false,
+                yAxisID: 'y-axis-t1',
+            };
+            var line_t2 = {
+                label: "t2",
+                data: {{ t2 }},
+                backgroundColor: window.chartColors.blue,
+                borderColor: window.chartColors.blue,
+                borderWidth: 1,
+                fill: false,
+                yAxisID: 'y-axis-t2',
+            };
+            var axis_x = {{ axis_x|safe }};
+
+            draw_line('id_grid_canvas', 'dd', 'dd', axis_x, [line_t1, line_t2], 'rgba(255,99,132,1)');
         });
     </script>
 
@@ -97,7 +141,22 @@
             </div>
         </div>
 
+        <div class="row">
+            <div class="col-xs-offset-1 col-xs-10">
+                <div id="h-slider" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"></div>
+            </div>
+        </div>
+
     </div>
+
+    <script>
+        $(document).ready(function () {
+            $('#h-slider').slider({
+                range: true,
+                values: [17, 67]
+            });
+        });
+    </script>
 
     {% include "base-navbar-bottom.html" %}
     {% include "base-tail.html" %}

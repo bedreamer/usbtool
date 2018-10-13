@@ -46,7 +46,7 @@ class ModbusCANChannel(object):
 
         self.can_frame_tx = 0
         self.can_frame_rx = 0
-        self.offline = True
+        self.offline = False
 
     def get_can_channel_status_bar_json(self, dev_id, dev_model, dev_name):
         return {

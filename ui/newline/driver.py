@@ -105,14 +105,14 @@ class ModbusDeviceDriver(object):
         reg = YaoxinRegister(ui_name, name, address, bits_map)
         self.yaoxin_register_list.append(reg)
 
-    def read_yaoxin(self, modbus_server_address):
+    def read_all_yaoxin(self, modbus_server_address):
         body = dict()
         for reg in self.yaoxin_register_list:
             modbus_value = self.modbuscan_channel.read_register(modbus_server_address, reg.address)
             body[reg.ui_name] = reg.complie_display_value(modbus_value)
         return body
 
-    def read_yaoce(self, modbus_server_address):
+    def read_all_yaoce(self, modbus_server_address):
         body = dict()
         for reg in self.yaoce_register_list:
             modbus_value = self.modbuscan_channel.read_register(modbus_server_address, reg.address)

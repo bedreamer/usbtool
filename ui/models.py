@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 from django.db import models
 
 
@@ -51,3 +52,11 @@ class Profiles(models.Model):
     modbus_can_idx = models.IntegerField(default=0, help_text="MODBUS-CAN设备索引号")
     modbus_can_channel = models.IntegerField(default=0, help_text="MODBUS-CAN设备通道")
     modbus_can_bps = models.CharField(max_length=30, help_text="MODBUS-CAN设备波特率")
+
+
+# Create your models here.
+class YaoceData(models.Model):
+    server_address = models.IntegerField(help_text="modbus 服务器地址")
+    tsp = models.DateTimeField(default="2018-01-01 00:00:00", help_text="记录时戳")
+
+    txt = models.TextField(help_text="json数据")

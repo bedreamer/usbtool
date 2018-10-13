@@ -2,6 +2,10 @@
 from ui.monitor import models
 import random
 import ui.newline.driver as driver
+from ui.models import YaoceData
+import json
+import time
+import datetime
 
 
 __model__ = 'VT-100'
@@ -12,7 +16,6 @@ __sections_template_map__ = {
     'model_恒温恒流设备_控制区': "监控/%s/model-控制区.html" % __model__,
     'model_恒温恒流设备_故障显示区': "监控/%s/model-故障显示区.html" % __model__
 }
-
 
 class Driver(driver.ModbusDeviceDriver):
     def __init__(self, session, modbus_dev, modbus_can_profile):
@@ -64,8 +67,14 @@ class Driver(driver.ModbusDeviceDriver):
 
     def run_step_forward(self, request):
         modbus_server_address = 1
-        yaoxin = self.read_yaoxin(modbus_server_address)
-        yaoce = self.read_yaoce(modbus_server_address)
+        yaoxin = self.read_all_yaoxin(modbus_server_address)
+        yaoce = self.read_all_yaoce(modbus_server_address)
+
+        yaoce_json = json.dumps(yaoce)
+        now = datetime.datetime.now()
+        record = YaoceData(server_address=modbus_server_address, tsp=now, txt=yaoce_json)
+        record.save()
+
         pack = {
             "data": dict(yaoce, **yaoxin),
             "status": self.modbus_channel.get_can_channel_status_bar_json(self.dev.id, self.dev.model, self.dev.name)
