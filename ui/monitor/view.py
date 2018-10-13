@@ -72,6 +72,7 @@ def monitor_session_in_grid(request, sid):
     context['session'] = s
     s.set_mode('grid')
 
+    context['record_count'] = models.YaoceData.objects.filter(server_address=1).count()
     all = models.YaoceData.objects.filter(server_address=1).order_by('-tsp')[:10]
 
     axis_x = list()

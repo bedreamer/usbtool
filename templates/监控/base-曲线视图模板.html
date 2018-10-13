@@ -151,9 +151,27 @@
 
     <script>
         $(document).ready(function () {
-            $('#h-slider').slider({
+            var show_count = 300;
+            var s_range = $('#h-slider').slider({
                 range: true,
-                values: [17, 67]
+                max: 1000,
+                values: [107, 367],
+                slide: function (event, ui) {
+                    console.log(event);
+                    if ( event.ctrlKey ) {
+                        show_count = ui.values[1] - ui.values[0];
+                    } else {
+                        if ( ui.value == ui.values[0] ) {
+                            var x = ui.values;
+                            x[1] = x[0] + show_count;
+                            s_range.slider("values", x);
+                        } else {
+                            var x = ui.values;
+                            x[0] = x[1] - show_count;
+                            s_range.slider("values", x);
+                        }
+                    }
+                }
             });
         });
     </script>
