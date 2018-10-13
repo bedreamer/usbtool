@@ -27,6 +27,26 @@ class YaoxinRegister:
     def __init__(self, ui_name, name, address, bits_map):
         self.ui_name, self.name, self.address, self.bits_map = ui_name, name, address, bits_map
 
+    def complie_display_value(self, modbus_value):
+        yaoxin = list()
+        x = bin(modbus_value)[2:]
+        padding = '0' * (16 - len(x))
+        str_bg = ''.join([padding, x])
+        str_zero_order = str_bg[::-1]
+
+        yaoxin.append(str_zero_order)
+
+        for idx, ch in enumerate(str_zero_order):
+            negtive, positive = self.bits_map[idx]
+            if ch == '0' and negtive not in {'', None}:
+                yaoxin.append(negtive)
+            elif ch == '1' and positive not in {'', None}:
+                yaoxin.append(positive)
+            else:
+                pass
+
+        return yaoxin
+
 
 class ModbusDeviceDriver(object):
     def __init__(self, name, model, modbuscan_channel, session, device):
@@ -89,7 +109,7 @@ class ModbusDeviceDriver(object):
         body = dict()
         for reg in self.yaoxin_register_list:
             modbus_value = self.modbuscan_channel.read_register(modbus_server_address, reg.address)
-            body[reg.ui_name] = modbus_value
+            body[reg.ui_name] = reg.complie_display_value(modbus_value)
         return body
 
     def read_yaoce(self, modbus_server_address):

@@ -1,4 +1,4 @@
-<table class="table table-bordered">
+<table class="table table-bordered table-condensed">
     <caption>
         <div class="row">
             <div class="col-xs-6">
@@ -8,15 +8,31 @@
         </div>
     </caption>
     <tr class="text-center">
-        <td>通讯故障</td>
-        <td>回液温度传感器或控温模块故障</td>
-        <td>低液位保护</td>
-        <td>压缩机高温报警</td>
+        <td class="error_panel">通讯故障</td>
+        <td class="error_panel">回液温度传感器或控温模块故障</td>
+        <td class="error_panel">低液位保护</td>
+        <td class="error_panel">压缩机高温报警</td>
     </tr>
     <tr class="text-center">
-        <td>压缩机高压报警</td>
-        <td>供液温度传感器或控温模块故障</td>
-        <td>压缩机低压报警</td>
-        <td>供液压力超压报警</td>
+        <td class="error_panel">压缩机高压报警</td>
+        <td class="error_panel">供液温度传感器或控温模块故障</td>
+        <td class="error_panel">压缩机低压报警</td>
+        <td class="error_panel">供液压力超压报警</td>
     </tr>
 </table>
+<script>
+    $(document).ready(function () {
+        $.lijie.bind("dev", function (dev) {
+            var error_panel = $(".error_panel");
+            for ( var i = 0; i < error_panel.length; i ++ ) {
+                var p = error_panel[i];
+                var text = $(p).html();
+                if ( dev.data.errors.indexOf(text) > -1 ) {
+                    $(p).addClass("danger");
+                } else {
+                    $(p).removeClass("danger");
+                }
+            }
+        });
+    });
+</script>
