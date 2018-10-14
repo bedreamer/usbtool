@@ -72,8 +72,21 @@ def monitor_session_in_grid(request, sid):
     context['session'] = s
     s.set_mode('grid')
 
+    try:
+        begin = int(request.GET['begin'])
+    except:
+        begin = 0
+
+    try:
+        end = int(request.GET['end'])
+    except:
+        end = 10
+
+    context['end'] = end
+    context['begin'] = begin
+    context['show_count'] = end - begin
     context['record_count'] = models.YaoceData.objects.filter(server_address=1).count()
-    all = models.YaoceData.objects.filter(server_address=1).order_by('-tsp')[:10]
+    all = models.YaoceData.objects.filter(server_address=1).order_by('-tsp')[begin:end]
 
     axis_x = list()
     t1 = list()
@@ -89,6 +102,38 @@ def monitor_session_in_grid(request, sid):
     context['axis_x'] = axis_x
 
     return render(request, "监控/base-曲线视图模板.html", context=context)
+
+
+def monitor_session_in_grid_json(request, sid):
+    pack = dict()
+    s = session.get_session_by_id(sid)
+    if s is None:
+        return api.json_redir_to_page(request, "会话不存在", '/')
+
+    try:
+        begin = int(request.GET['begin'])
+    except:
+        begin = 0
+
+    try:
+        count = int(request.GET['count'])
+    except:
+        count = 1
+
+    total = models.YaoceData.objects.filter(server_address=1).count()
+    records_list = models.YaoceData.objects.filter(server_address=1).order_by('-tsp')[begin: begin + count]
+
+    pack['axis_x'] = [r.tsp.strftime("%H:%M:%S") for r in records_list]
+    for r in records_list:
+        j = json.loads(r.txt)
+        for key, value in j.items():
+            try:
+                pack[key].append(value)
+            except:
+                pack[key] = list()
+                pack[key].append(value)
+
+    return api.json_without_error(request, pack, total=total, begin=begin, count=count)
 
 
 def monitor_show_session_configure_page(request, sid):
@@ -215,6 +260,7 @@ urlpatterns = [
 
     path("<int:sid>/panel/", monitor_show_main_page),
     path("<int:sid>/grid/", monitor_session_in_grid),
+    path("<int:sid>/grid/json/", monitor_session_in_grid_json),
     path("<int:sid>/list/", monitor_session_in_list),
 
     path("<int:sid>/options/", monitor_show_session_configure_page),
